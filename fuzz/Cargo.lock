@@ -2659,6 +2659,7 @@ dependencies = [
 name = "ssh_ca_server-fuzz"
 version = "0.0.0"
 dependencies = [
+ "arbitrary",
  "libfuzzer-sys",
  "serde_json",
  "ssh-key",
