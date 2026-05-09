@@ -53,16 +53,16 @@ The `clients/` directory contains two Bash scripts for requesting certificates f
 **Sign a user certificate** (run on the user's workstation):
 
 ```bash
-ssh-ca-sign-user-key.sh -s ca-server.example.com
+ssh-ca-sign-user-key -s ca-server.example.com
 ```
 
 **Sign a host certificate** (run on the managed host, as root):
 
 ```bash
-sudo ssh-ca-sign-host-key.sh -s ca-server.example.com --reload
+sudo ssh-ca-sign-host-key -s ca-server.example.com --reload
 ```
 
-Both scripts support `--help` for the full option list. See [documentation/setup.md](documentation/setup.md) for installation instructions and all options.
+Both scripts support `--help` for the full option list. See [User Setup](documentation/setup-user.md) and [Host Setup](documentation/setup-host.md) for installation instructions and all options.
 
 ---
 
