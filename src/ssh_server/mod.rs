@@ -117,7 +117,7 @@ impl SshCaServer {
             None => russh::server::Config {
                 inactivity_timeout: Some(std::time::Duration::from_secs(5)),
                 auth_rejection_time: std::time::Duration::from_secs(3),
-                auth_rejection_time_initial: Some(std::time::Duration::from_secs(0)),
+                auth_rejection_time_initial: None,
                 max_auth_attempts: 1,
                 methods: auth_methods,
                 keys: vec![server_private_key],
@@ -139,7 +139,7 @@ impl SshCaServer {
                 russh::server::Config {
                     inactivity_timeout: Some(std::time::Duration::from_secs(5)),
                     auth_rejection_time: std::time::Duration::from_secs(3),
-                    auth_rejection_time_initial: Some(std::time::Duration::from_secs(0)),
+                    auth_rejection_time_initial: None,
                     max_auth_attempts: 1,
                     methods: auth_methods,
                     keys: vec![server_private_key],
