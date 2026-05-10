@@ -5,13 +5,12 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  contents: write
-
 jobs:
   build:
     name: Build (${{ matrix.distro }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: ${{ matrix.image }}
     strategy:
@@ -78,7 +77,10 @@ jobs:
   attach:
     name: Attach to GitHub Release
     needs: [build]
+    if: ${{ success() }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -90,20 +92,13 @@ jobs:
       - name: List downloaded artifacts
         run: find artifacts -name '*.deb' | sort
 
-      - name: Wait for GitHub release to exist
+      - name: Create GitHub release if not exists
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
-          for i in $(seq 1 30); do
-            if gh release view "$TAG" > /dev/null 2>&1; then
-              echo "Release $TAG found."
-              break
-            fi
-            echo "Waiting for release $TAG (attempt $i/30)..."
-            sleep 10
-          done
-          gh release view "$TAG"
+          gh release view "$TAG" 2>/dev/null \
+            || gh release create "$TAG" --generate-notes --title "$TAG"
 
       - name: Upload server packages (all distros)
         env:
