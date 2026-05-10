@@ -33,10 +33,11 @@ jobs:
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           VERSION="${TAG#v}"
+          VERSION="${VERSION//_/-}"
           echo "tag=$TAG" >> $GITHUB_OUTPUT
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-          if [[ "$TAG" =~ -(alpha|beta|rc) ]]; then
+          if [[ "$TAG" =~ [-_](alpha|beta|rc) ]]; then
             echo "prerelease=true" >> $GITHUB_OUTPUT
             echo "Pre-release detected: $TAG"
           else
