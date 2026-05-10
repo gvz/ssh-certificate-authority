@@ -10,10 +10,6 @@ use ssh_ca_server::{CliArgs, run_server};
 /// function to start the server.
 #[tokio::main]
 async fn main() {
-    #[cfg(feature = "test_auth")]
-    panic!("test_auth enabled in main binary");
-
-    #[allow(unreachable_code)]
     let args = CliArgs::parse();
     run_server(args).await;
 }

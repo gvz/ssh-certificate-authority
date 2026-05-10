@@ -4,6 +4,9 @@
 //! It includes the main server logic, command-line argument parsing,
 //! and the coordination between the SSH server and the Certificate Authority (CA).
 
+#[cfg(feature = "test_auth")]
+compile_error!("`test_auth` must never be enabled in a build — it logs plaintext passwords. Remove `--features test_auth` from your build command.");
+
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use clap::Parser;
 use log::{error, info};
