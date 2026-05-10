@@ -7,7 +7,7 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use anyhow::Result;
-use log::debug;
+use log::{debug, error};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::UnixStream;
 
@@ -54,7 +54,11 @@ impl CaClient {
         debug!("connection to: {}", self.socket_path);
         let mut stream = UnixStream::connect(&self.socket_path).await?;
 
-        let counter = self.counter.fetch_add(1, Ordering::SeqCst) + 1;
+        let prev = self.counter.fetch_add(1, Ordering::SeqCst);
+        let counter = prev.checked_add(1).ok_or_else(|| {
+            error!("IPC counter exhausted after 2^64 requests; CA must be restarted");
+            anyhow::anyhow!("IPC counter exhausted: restart the CA process to restore service")
+        })?;
         let auth_request = AuthenticatedRequest {
             token: self.auth_token.clone(),
             counter,
@@ -183,8 +187,7 @@ mod tests {
         );
     }
 
-    /// Tests that the counter handles near-max values correctly.
-    /// Note: At u64::MAX, adding 1 causes wrapping.
+    /// Tests that the counter saturates at u64::MAX and does not wrap.
     #[test]
     fn test_counter_near_max() {
         let client = CaClient::new("/tmp/test.sock".to_string(), "test-token".to_string());
@@ -192,16 +195,17 @@ mod tests {
         // Set counter to near max value
         client.counter.store(u64::MAX - 2, Ordering::SeqCst);
 
-        let counter1 = client.counter.fetch_add(1, Ordering::SeqCst) + 1;
-        assert_eq!(counter1, u64::MAX - 1);
+        // Second-to-last valid counter
+        let prev1 = client.counter.fetch_add(1, Ordering::SeqCst);
+        assert_eq!(prev1.checked_add(1), Some(u64::MAX - 1));
 
-        let counter2 = client.counter.fetch_add(1, Ordering::SeqCst) + 1;
-        assert_eq!(counter2, u64::MAX);
+        // Last valid counter
+        let prev2 = client.counter.fetch_add(1, Ordering::SeqCst);
+        assert_eq!(prev2.checked_add(1), Some(u64::MAX));
 
-        // At u64::MAX, fetch_add returns u64::MAX, then adding 1 wraps to 0
-        let fetched = client.counter.fetch_add(1, Ordering::SeqCst);
-        assert_eq!(fetched, u64::MAX, "fetch_add should return u64::MAX");
-        let counter3 = fetched.wrapping_add(1);
-        assert_eq!(counter3, 0, "Counter wraps to 0 after u64::MAX");
+        // At u64::MAX: checked_add returns None — overflow detected, no wrap
+        let prev3 = client.counter.fetch_add(1, Ordering::SeqCst);
+        assert_eq!(prev3, u64::MAX, "fetch_add returns u64::MAX before wrapping");
+        assert!(prev3.checked_add(1).is_none(), "overflow detected, request must be rejected");
     }
 }
