@@ -45,4 +45,25 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(fuzzing)'] }
 
 [dev-dependencies]
 
+[package.metadata.deb]
+name = "ssh-ca-server"
+maintainer = "SSH CA Server Contributors"
+copyright = "2024, SSH CA Server Contributors"
+extended-description = "SSH Certificate Authority server daemon"
+depends = "$auto, libpam0g"
+section = "net"
+priority = "optional"
+assets = [
+  ["target/release/ssh_ca_server", "usr/bin/ssh-ca-server", "755"],
+  ["config/config.toml", "etc/ssh-ca-server/config.toml.example", "644"],
+]
 
+[package.metadata.deb.variants.client]
+name = "ssh-ca-client"
+architecture = "all"
+extended-description = "Client scripts for SSH Certificate Authority certificate signing"
+depends = "openssh-client"
+assets = [
+  ["clients/ssh-ca-sign-user-key.sh", "usr/bin/ssh-ca-sign-user-key", "755"],
+  ["clients/ssh-ca-sign-host-key.sh", "usr/bin/ssh-ca-sign-host-key", "755"],
+]
