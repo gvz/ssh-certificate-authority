@@ -5,13 +5,12 @@ on:
     tags:
       - 'v*'
 
-permissions:
-  contents: write
-
 jobs:
   build:
     name: Build (${{ matrix.distro }})
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     container:
       image: ${{ matrix.image }}
     strategy:
@@ -79,6 +78,8 @@ jobs:
     name: Attach to GitHub Release
     needs: [build]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -99,6 +100,10 @@ jobs:
             if gh release view "$TAG" > /dev/null 2>&1; then
               echo "Release $TAG found."
               break
+            fi
+            if [ "$i" -eq 30 ]; then
+              echo "Timed out waiting for release $TAG after 30 attempts"
+              exit 1
             fi
             echo "Waiting for release $TAG (attempt $i/30)..."
             sleep 10
