@@ -1,0 +1,124 @@
+name: Build Debian Packages
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.distro }})
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - distro: debian12
+            image: debian:12
+          - distro: debian13
+            image: debian:trixie
+          - distro: ubuntu2604
+            image: ubuntu:26.04
+
+    steps:
+      - name: Install git and ca-certificates
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq git ca-certificates curl
+
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          apt-get install -y -qq \
+            pkg-config \
+            libpam-dev \
+            libclang-dev \
+            dpkg-dev \
+            build-essential
+
+      - name: Install Rust (stable)
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+            | sh -s -- -y --default-toolchain stable --profile minimal
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Install cargo-deb
+        run: cargo install cargo-deb
+
+      - name: Build server package
+        run: cargo deb
+
+      - name: Build client package (reuse compiled binary)
+        run: cargo deb --variant=client --no-build
+
+      - name: Rename server package with distro suffix
+        run: |
+          DISTRO="${{ matrix.distro }}"
+          cd target/debian
+          for f in ssh-ca-server_*.deb; do
+            base="${f%.deb}"
+            mv "$f" "${base}-${DISTRO}.deb"
+          done
+          echo "Packages in target/debian:"
+          ls -lh
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: debs-${{ matrix.distro }}
+          path: target/debian/*.deb
+          if-no-files-found: error
+
+  attach:
+    name: Attach to GitHub Release
+    needs: [build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all deb artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded artifacts
+        run: find artifacts -name '*.deb' | sort
+
+      - name: Wait for GitHub release to exist
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          for i in $(seq 1 30); do
+            if gh release view "$TAG" > /dev/null 2>&1; then
+              echo "Release $TAG found."
+              break
+            fi
+            echo "Waiting for release $TAG (attempt $i/30)..."
+            sleep 10
+          done
+          gh release view "$TAG"
+
+      - name: Upload server packages (all distros)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          gh release upload "$TAG" \
+            artifacts/debs-debian12/ssh-ca-server_*-debian12.deb \
+            artifacts/debs-debian13/ssh-ca-server_*-debian13.deb \
+            artifacts/debs-ubuntu2604/ssh-ca-server_*-ubuntu2604.deb
+
+      - name: Upload client package (from debian12, architecture-independent)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          gh release upload "$TAG" \
+            artifacts/debs-debian12/ssh-ca-client_*.deb
