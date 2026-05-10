@@ -50,6 +50,8 @@ name = "ssh-ca-server"
 maintainer = "SSH CA Server Contributors"
 copyright = "2024, SSH CA Server Contributors"
 extended-description = "SSH Certificate Authority server daemon"
+# libpam0g is loaded via dlopen at runtime (not DT_NEEDED), so $auto won't detect it;
+# the explicit entry is required.
 depends = "$auto, libpam0g"
 section = "net"
 priority = "optional"
