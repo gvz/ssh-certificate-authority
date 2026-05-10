@@ -122,8 +122,11 @@ pub fn find_config_by_public_key(
         debug!("checking for public key in {}", file.to_str().unwrap());
         let host_config = match read_config(file.to_str().unwrap()) {
             Err(e) => {
-                error!("could not read {}: {}", file.to_str().unwrap(), e);
-                return None;
+                error!(
+                    "skipping unreadable host config {:?}: {} — fix or remove this file to avoid auth disruption",
+                    file, e
+                );
+                continue;
             }
             Ok(conf) => conf,
         };
