@@ -9,7 +9,7 @@ impl Handler for ClientHandler {
     type Error = russh::Error;
     async fn check_server_key(
         &mut self,
-        _server_public_key: &russh::keys::PublicKey,
+        _server_public_key: &russh::cert::PublicKeyOrCertificate,
     ) -> Result<bool, Self::Error> {
         // Always accept the server's key (not safe for production!)
         Ok(true)

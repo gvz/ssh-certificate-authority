@@ -21,8 +21,8 @@ let
 
   russh-src = pkgs.fetchgit {
     url = "https://github.com/gvz/russh.git";
-    rev = "1fe6853";
-    hash = "sha256-UYrFXRLhqW7cV3CBHVURebNlFjVh4Iopf6keMAVrhUI=";
+    rev = "cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4";
+    hash = "sha256-lxAjQ/OLxd8xcpc/tGOVqJS5z94RJBkisXays8cwtJw=";
   };
 
   common = {
@@ -54,9 +54,9 @@ let
     ];
     postPatch = ''
       substituteInPlace Cargo.toml \
-          --replace 'git = "https://github.com/gvz/russh.git"' \
-                    'path = "${russh-src}/russh"'
-          cat Cargo.toml
+          --replace-fail 'git = "https://github.com/gvz/russh.git"' \
+                         'path = "${russh-src}/russh"'
+      cat Cargo.toml
     '';
   };
 
