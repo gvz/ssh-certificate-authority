@@ -62,7 +62,6 @@ assets = [
 
 [package.metadata.deb.variants.client]
 name = "ssh-ca-client"
-architecture = "all"
 extended-description = "Client scripts for SSH Certificate Authority certificate signing"
 depends = "openssh-client"
 assets = [

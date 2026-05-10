@@ -1881,7 +1881,7 @@ dependencies = [
 [[package]]
 name = "pageant"
 version = "0.2.0"
-source = "git+https://github.com/gvz/russh.git?rev=cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4#cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4"
+source = "git+https://github.com/gvz/russh.git#cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4"
 dependencies = [
  "byteorder",
  "bytes",
@@ -2397,7 +2397,7 @@ dependencies = [
 [[package]]
 name = "russh"
 version = "0.60.2"
-source = "git+https://github.com/gvz/russh.git?rev=cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4#cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4"
+source = "git+https://github.com/gvz/russh.git#cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4"
 dependencies = [
  "aead 0.6.0-rc.10",
  "aes 0.8.4",
@@ -2487,7 +2487,7 @@ dependencies = [
 [[package]]
 name = "russh-cryptovec"
 version = "0.59.0"
-source = "git+https://github.com/gvz/russh.git?rev=cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4#cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4"
+source = "git+https://github.com/gvz/russh.git#cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4"
 dependencies = [
  "log",
  "nix 0.31.2",
@@ -2566,7 +2566,7 @@ dependencies = [
 [[package]]
 name = "russh-util"
 version = "0.52.0"
-source = "git+https://github.com/gvz/russh.git?rev=cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4#cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4"
+source = "git+https://github.com/gvz/russh.git#cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4"
 dependencies = [
  "chrono",
  "tokio",
