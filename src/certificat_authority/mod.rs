@@ -118,7 +118,7 @@ impl CertificateAuthority {
         let cert = match cert_builder.sign(&self.private_key) {
             Ok(cert) => cert,
             Err(e) => {
-                error!("singing failed: {}", e);
+                error!("signing failed: {}", e);
                 return Err(e.into());
             }
         };
@@ -199,7 +199,7 @@ impl CertificateAuthority {
         let cert = match cert_builder.sign(&self.private_key) {
             Ok(cert) => cert,
             Err(e) => {
-                error!("singing failed: {}", e);
+                error!("signing failed: {}", e);
                 return Err(e.into());
             }
         };

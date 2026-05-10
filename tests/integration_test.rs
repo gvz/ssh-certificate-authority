@@ -3,7 +3,7 @@ use env_logger;
 use russh::client::{AuthResult, Config, Handler};
 use ssh_key::rand_core::{OsRng, RngCore};
 use ssh_key::{Algorithm, Certificate, private::PrivateKey};
-use std::env::{self};
+use std::env;
 use std::fs::{self, File};
 use std::io::Write;
 use std::os::unix::fs::PermissionsExt;
@@ -23,12 +23,8 @@ use common::{client_handler, ssh_test_server};
 
 #[tokio::test]
 async fn test_user_key_signing() {
-    if env::var("RUST_LOG").is_err() {
-        unsafe {
-            env::set_var("RUST_LOG", "info");
-        }
-    }
-    let _ = env_logger::try_init();
+    let _ = env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info"))
+        .try_init();
     let temp_dir = tempdir().expect("Failed to create temporary directory");
     let config_path = temp_dir.path().join("config.toml");
     let ca_private_key_path = temp_dir.path().join("ca_key");

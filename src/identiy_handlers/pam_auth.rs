@@ -1,5 +1,6 @@
 use anyhow::Result;
 use log::warn;
+use nix::unistd::User;
 use pam::Client;
 
 use crate::identiy_handlers::{Credential, Error, UserAuthenticator};
@@ -29,10 +30,13 @@ impl UserAuthenticator for PamAuthenticator {
 ///
 /// A `Result` containing `true` if the user is authenticated, `false` otherwise, or an error.
 pub fn pam_authenticate_user(user: &str, password: &str) -> Result<bool> {
-    let forbidden_users = vec!["root"];
-    for bad_user in forbidden_users {
-        if user == bad_user {
-            warn!("forbidden user was provided: {}", user);
+    if user == "root" {
+        warn!("forbidden user was provided: {}", user);
+        return Err(Error::ForbiddenUser(user.to_string()).into());
+    }
+    if let Ok(Some(u)) = User::from_name(user) {
+        if u.uid.as_raw() < 1000 {
+            warn!("system account login attempt blocked: {}", user);
             return Err(Error::ForbiddenUser(user.to_string()).into());
         }
     }

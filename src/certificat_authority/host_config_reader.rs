@@ -10,6 +10,7 @@ use anyhow::{Result, anyhow};
 use glob::glob;
 use log::{debug, error, warn};
 use serde::Deserialize;
+use ssh_key::PublicKey;
 
 use crate::certificat_authority::config;
 
@@ -84,6 +85,15 @@ pub fn find_config_by_public_key(
     public_key: &str,
     config: &config::Ca,
 ) -> Option<(String, HostConfig)> {
+    // Parse the search key once up front; reject malformed input early.
+    let search_key = match PublicKey::from_openssh(public_key) {
+        Ok(k) => k,
+        Err(e) => {
+            warn!("malformed search public key: {}", e);
+            return None;
+        }
+    };
+
     // Canonicalize the inventory path before constructing the glob pattern
     // to prevent unsanitized config paths from affecting glob behavior
     let canonical_inventory = match config.host_inventory.canonicalize() {
@@ -130,30 +140,26 @@ pub fn find_config_by_public_key(
             }
             Ok(conf) => conf,
         };
-        let key_parts: Vec<&str> = host_config.public_key.split_whitespace().collect();
-        if key_parts.len() < 2 {
-            warn!(
-                "skipping malformated key in config {}: {}",
-                file.to_str().unwrap(),
-                public_key
+        let config_pub_key = match PublicKey::from_openssh(&host_config.public_key) {
+            Ok(k) => k,
+            Err(e) => {
+                warn!("skipping malformed key in config {:?}: {}", file, e);
+                continue;
+            }
+        };
+        if config_pub_key.key_data() != search_key.key_data() {
+            debug!(
+                "host key not matching for {}",
+                host_config.hostnames.first().map(|s| s.as_str()).unwrap_or("<unknown>")
             );
             continue;
         }
-        let formatted_host_key = format!("{} {}", key_parts[0], key_parts[1]);
-        if formatted_host_key != public_key {
-            debug!(
-                "host key not matching for {}: {} != {}",
-                host_config.hostnames[0], formatted_host_key, public_key
-            );
-            continue;
-        } else {
-            debug!(
-                "host for public key found: {}",
-                host_config.hostnames.first().unwrap()
-            );
-            let file_stem = file.file_stem().unwrap().to_str().unwrap().to_string();
-            return Some((file_stem, host_config));
-        }
+        debug!(
+            "host for public key found: {}",
+            host_config.hostnames.first().map(|s| s.as_str()).unwrap_or("<unknown>")
+        );
+        let file_stem = file.file_stem().unwrap().to_str().unwrap().to_string();
+        return Some((file_stem, host_config));
     }
     None
 }

@@ -66,13 +66,13 @@ pub async fn handler_sign_user_key(
             return Ok(());
         }
         Ok(CaResponse::KeyFound(_)) => {
-            panic!("Signing request replyed with KeyFound, which must not happen")
+            panic!("Signing request replied with KeyFound, which must not happen")
         }
     };
     let openssh_cert = match cert.to_openssh() {
         Ok(cert) => cert,
         Err(e) => {
-            let error_message = format!("failed to concert cert to openssh format : {}", e);
+            let error_message = format!("failed to convert cert to openssh format: {}", e);
             error!("{}", &error_message);
             let _ = session.disconnect(russh::Disconnect::ByApplication, &error_message, "en");
             return Ok(());

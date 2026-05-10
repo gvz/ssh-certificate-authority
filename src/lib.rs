@@ -62,12 +62,8 @@ pub struct CliArgs {
 ///
 /// * `args` - The command-line arguments parsed by `clap`.
 pub async fn run_server(args: CliArgs) {
-    if env::var("RUST_LOG").is_err() {
-        unsafe {
-            env::set_var("RUST_LOG", "info");
-        }
-    }
-    let _ = env_logger::try_init();
+    let _ = env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info"))
+        .try_init();
 
     let config = match config::read_config(&args.config_file) {
         Ok(c) => c,
