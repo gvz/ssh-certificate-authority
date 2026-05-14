@@ -27,6 +27,19 @@ pub mod host_key_signer;
 pub(crate) mod signing_common;
 pub(crate) mod user_key_signer;
 
+/// Validates that a username contains only safe characters.
+///
+/// Accepts `[a-zA-Z0-9._@-]`, 1–64 characters long. Rejects anything outside
+/// this set to prevent TOML/template injection via the username in certificate
+/// principal rendering.
+pub fn validate_username(user: &str) -> bool {
+    !user.is_empty()
+        && user.len() <= 64
+        && user
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '_' | '@' | '-'))
+}
+
 /// Parses a raw exec-request payload into a command name and remaining arguments.
 ///
 /// The input bytes are first decoded as lossy UTF-8, then split on whitespace.
@@ -204,7 +217,13 @@ impl Handler for ConnectionHandler {
     /// This function iterates through the enabled authenticators and tries to
     /// authenticate the user with the given password.
     async fn auth_password(&mut self, user: &str, password: &str) -> Result<Auth, Self::Error> {
-        //TODO: block certain users
+        if !validate_username(user) {
+            warn!("rejected login: username '{}' contains disallowed characters", user);
+            return Ok(Auth::Reject {
+                proceed_with_methods: None,
+                partial_success: false,
+            });
+        }
         #[cfg(feature = "test_auth")]
         {
             warn!("Test Authenticate: {}, {}", user, password);
