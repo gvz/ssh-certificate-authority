@@ -2,8 +2,6 @@
 //!
 //! This module is responsible for reading and parsing host-specific certificate templates.
 
-use std::fs::File;
-use std::io::Read;
 use std::path::Path;
 
 use anyhow::{Result, anyhow};
@@ -74,7 +72,7 @@ pub fn read_host_config(host_name: &str, config: &config::Ca) -> Result<HostConf
     // Verify the resolved path stays within the host inventory directory
     let safe_path = ensure_path_within_directory(&host_inventory_path, &config.host_inventory)?;
 
-    let host_config = read_config(safe_path.to_str().unwrap())?;
+    let host_config: HostConfig = super::read_toml_file(&safe_path)?;
     Ok(host_config)
 }
 
@@ -130,7 +128,7 @@ pub fn find_config_by_public_key(
             continue;
         }
         debug!("checking for public key in {}", file.to_str().unwrap());
-        let host_config = match read_config(file.to_str().unwrap()) {
+        let host_config: HostConfig = match super::read_toml_file(file.as_path()) {
             Err(e) => {
                 error!(
                     "skipping unreadable host config {:?}: {} — fix or remove this file to avoid auth disruption",
@@ -164,32 +162,6 @@ pub fn find_config_by_public_key(
     None
 }
 
-fn read_config(file: &str) -> Result<HostConfig> {
-    let mut config_file = match File::open(&file).map_err(|e| {
-        error!("failed to open host inventory, {:?}: {}", &file, e);
-        e
-    }) {
-        Err(e) => {
-            error!("failed to read {}: {}", file, e);
-            return Err(e.into());
-        }
-        Ok(config_file) => config_file,
-    };
-    let mut config_text = String::new();
-    let _ = match config_file.read_to_string(&mut config_text).map_err(|e| {
-        error!("failed to read host template, {:?}: {}", &file, e);
-        e
-    }) {
-        Err(e) => {
-            error!("failed to read to string {}: {}", config_text, e);
-            return Err(e.into());
-        }
-        Ok(_) => {}
-    };
-    let config: HostConfig = toml::from_str(&config_text)?;
-
-    Ok(config)
-}
 
 #[cfg(test)]
 mod tests {

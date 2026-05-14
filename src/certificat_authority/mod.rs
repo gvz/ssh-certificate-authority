@@ -4,12 +4,13 @@
 //! It is responsible for signing SSH certificates based on user requests.
 use std::fs::File;
 use std::io::Read;
+use std::path::Path;
 
 use anyhow::Result;
 #[cfg(feature = "arbitrary")]
 use arbitrary::{Arbitrary, Unstructured};
 use log::{debug, error, info};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 use ssh_key::rand_core::{OsRng, RngCore};
 use ssh_key::{
     PublicKey,
@@ -205,6 +206,22 @@ impl CertificateAuthority {
         };
         Ok(cert)
     }
+}
+
+/// Reads a file and deserializes its contents as TOML into `T`.
+///
+/// Logs errors for open and read failures before propagating them.
+pub(crate) fn read_toml_file<T: DeserializeOwned>(path: &Path) -> Result<T> {
+    let mut file = File::open(path).map_err(|e| {
+        error!("failed to open {:?}: {}", path, e);
+        e
+    })?;
+    let mut text = String::new();
+    file.read_to_string(&mut text).map_err(|e| {
+        error!("failed to read {:?}: {}", path, e);
+        e
+    })?;
+    Ok(toml::from_str(&text)?)
 }
 
 /// Parses an OpenSSH public key string into a `PublicKey` object.

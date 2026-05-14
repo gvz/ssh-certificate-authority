@@ -52,25 +52,7 @@ struct UserList {
 ///
 /// A `Result` containing the `UserDefaults` for the user or an error.
 pub fn read_user_defaults(user: &str, config: &config::Ca) -> Result<UserDefaults> {
-    let mut user_list_file = File::open(config.user_list_file.clone()).map_err(|e| {
-        error!(
-            "failed to open user list, {:?}: {}",
-            &config.user_list_file, e
-        );
-        e
-    })?;
-    let mut user_list = String::new();
-    let _ = user_list_file.read_to_string(&mut user_list).map_err(|e| {
-        error!(
-            "failed to read user list, {:?}: {}",
-            &config.user_list_file, e
-        );
-        e
-    })?;
-    let user_file_map: UserList = toml::from_str(&user_list).map_err(|e| {
-        error!("failed to parse user list form toml: {}", e);
-        e
-    })?;
+    let user_file_map: UserList = super::read_toml_file(&config.user_list_file)?;
 
     // use specified config for user or defaut if user has no defaults defined
     let template_path = match user_file_map.users.get(user) {
