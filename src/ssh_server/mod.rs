@@ -24,6 +24,7 @@ use crate::identiy_handlers::{Credential, UserAuthenticator};
 
 pub(crate) mod config;
 pub mod host_key_signer;
+pub(crate) mod signing_common;
 pub(crate) mod user_key_signer;
 
 /// Parses a raw exec-request payload into a command name and remaining arguments.
