@@ -19,12 +19,6 @@ let
     rustc = rust-toolchain;
   };
 
-  russh-src = pkgs.fetchgit {
-    url = "https://github.com/gvz/russh.git";
-    rev = "cfe5d8a99d5dd57fcef927f2ea8bbf7ba26ceef4";
-    hash = "sha256-lxAjQ/OLxd8xcpc/tGOVqJS5z94RJBkisXays8cwtJw=";
-  };
-
   common = {
     pname = "ssh_ca_server";
     version = "0.1.0";
@@ -52,12 +46,6 @@ let
       pkgs.pam
       pkgs.systemd
     ];
-    postPatch = ''
-      substituteInPlace Cargo.toml \
-          --replace-fail 'git = "https://github.com/gvz/russh.git"' \
-                         'path = "${russh-src}/russh"'
-      cat Cargo.toml
-    '';
   };
 
   app = naersk-lib.buildPackage (common // { doCheck = false; });

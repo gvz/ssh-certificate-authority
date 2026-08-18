@@ -24,7 +24,6 @@
           "patchPhase"
           "installPhase"
         ];
-        postPatch = common.postPatch;
         installPhase = ''
           # Create a directory layout where the fuzz workspace is at the
           # root (so naersk finds its Cargo.lock) but the parent crate

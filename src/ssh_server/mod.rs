@@ -14,7 +14,7 @@ use log::{debug, error, info, warn};
 use russh::{
     Channel, ChannelId, Error,
     keys::PublicKey,
-    server::{Auth, Handler, Msg, Server, Session},
+    server::{Auth, ChannelOpenHandle, Handler, Msg, Server, Session},
 };
 use tokio::sync::Mutex;
 
@@ -132,7 +132,10 @@ impl SshCaServer {
                 inactivity_timeout: Some(std::time::Duration::from_secs(5)),
                 auth_rejection_time: std::time::Duration::from_secs(3),
                 auth_rejection_time_initial: None,
-                max_auth_attempts: 1,
+                // Counts rejected auth requests. OpenSSH always probes with the
+                // "none" method first, which burns one rejection, so a value of
+                // 1 locks out every real client. 3 leaves one genuine retry.
+                max_auth_attempts: 3,
                 methods: auth_methods,
                 keys: vec![server_private_key],
                 preferred: russh::Preferred {
@@ -154,7 +157,8 @@ impl SshCaServer {
                     inactivity_timeout: Some(std::time::Duration::from_secs(5)),
                     auth_rejection_time: std::time::Duration::from_secs(3),
                     auth_rejection_time_initial: None,
-                    max_auth_attempts: 1,
+                    // See the comment on the non-certificate config above.
+                    max_auth_attempts: 3,
                     methods: auth_methods,
                     keys: vec![server_private_key],
                     certificates: vec![server_certificate],
@@ -322,14 +326,16 @@ impl Handler for ConnectionHandler {
     async fn channel_open_session(
         &mut self,
         channel: Channel<Msg>,
+        reply: ChannelOpenHandle,
         session: &mut Session,
-    ) -> Result<bool, Self::Error> {
+    ) -> Result<(), Self::Error> {
         {
             let mut clients = self.server.clients.lock().await;
             clients.insert(self.id, (channel.id(), session.handle()));
             debug!("new client connected");
         }
-        Ok(true)
+        reply.accept().await;
+        Ok(())
     }
 
     /// Handles incoming channel data by delegating to the user key signing handler.

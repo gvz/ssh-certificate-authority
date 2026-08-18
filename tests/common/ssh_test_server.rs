@@ -4,7 +4,7 @@ use log::{debug, error};
 use russh::{
     Channel,
     keys::PrivateKey,
-    server::{Auth, Handler, Msg, Server, Session},
+    server::{Auth, ChannelOpenHandle, Handler, Msg, Server, Session},
 };
 
 #[derive(Debug, Clone)]
@@ -114,8 +114,10 @@ impl Handler for ConnectionHandler {
     async fn channel_open_session(
         &mut self,
         channel: Channel<Msg>,
+        reply: ChannelOpenHandle,
         session: &mut Session,
-    ) -> Result<bool, Self::Error> {
-        Ok(true)
+    ) -> Result<(), Self::Error> {
+        reply.accept().await;
+        Ok(())
     }
 }
