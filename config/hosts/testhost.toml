@@ -1,6 +1,6 @@
 validity_in_days = 365
 hostnames = [
-    "testhost"
+    "testhost",
     "testhost.test"
 ]
 public_key = "<PUBLIC_KEY>"

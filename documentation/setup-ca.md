@@ -4,7 +4,7 @@ Two install options: Debian package (recommended for Debian/Ubuntu) or build fro
 
 ## Option A: Debian package
 
-Packages published on every [GitHub Release](https://github.com/your-org/ssh_acme_server/releases). `amd64` only — other architectures use [Option B](#option-b-build-from-source).
+Packages published on every [GitHub Release](https://github.com/gvz/ssh-certificate-authority/releases). `amd64` only — other architectures use [Option B](#option-b-build-from-source).
 
 ```bash
 sudo dpkg -i ssh-ca-server_<version>_amd64.deb
@@ -24,6 +24,8 @@ On first install, the package creates:
 | systemd service | `ssh-ca-server.service` (enabled + started) |
 
 Binary: `/usr/bin/ssh_ca_server`.
+
+> The package built with `cargo deb` uses different names: binary `ssh-ca-server`, config directory `/etc/ssh-ca-server/`. It ships `config.toml.example` and creates no keys.
 
 ### Configure users
 
@@ -131,8 +133,8 @@ nix develop   # or: direnv allow
 ### Build
 
 ```bash
-git clone https://github.com/your-org/ssh_acme_server.git
-cd ssh_acme_server
+git clone https://github.com/gvz/ssh-certificate-authority.git
+cd ssh-certificate-authority
 cargo build --release
 sudo cp target/release/ssh_ca_server /usr/local/bin/ssh_ca_server
 ```

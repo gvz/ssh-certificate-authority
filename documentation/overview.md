@@ -4,7 +4,7 @@ Self-hosted SSH Certificate Authority. Issues short-lived signed SSH certificate
 
 Communication happens over SSH. CA listens on a dedicated port. Users authenticate via PAM; hosts via their existing SSH host key.
 
-Pre-built Debian packages published on every [GitHub Release](https://github.com/your-org/ssh_acme_server/releases). Building from source also supported on any Linux system.
+Pre-built Debian packages published on every [GitHub Release](https://github.com/gvz/ssh-certificate-authority/releases). Building from source also supported on any Linux system.
 
 ## Roles
 

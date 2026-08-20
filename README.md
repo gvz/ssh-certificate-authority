@@ -11,7 +11,7 @@ See **[Setup Guide](documentation/overview.md)** for a full walkthrough: prerequ
 - **SSH Certificate Authority:** A built-in CA that signs SSH public keys into user or host certificates.
 - **Pluggable Authentication:** Supports different authentication methods for users requesting certificates (currently PAM). `root` is explicitly blocked.
 - **Host Certificate Signing:** Hosts authenticate with their public key (verified against a pre-registered inventory) and receive a signed host certificate.
-- **Unix Socket IPC:** The SSH server and CA server communicate over a Unix socket for secure inter-process communication.
+- **Unix Socket IPC:** The SSH server and CA server communicate over a Unix socket, authenticated with a shared token (see `--token-file`).
 - **Configurable:** Configured via TOML files for SSH server settings, CA settings, and per-user certificate templates.
 - **Dynamic User Templates:** User certificate templates are rendered with [MiniJinja](https://docs.rs/minijinja) (Jinja2-compatible), allowing flexible principal and extension management per user.
 
@@ -35,15 +35,21 @@ src/
 │   ├── mod.rs                            # SSH server, connection handler, auth dispatch
 │   ├── config.rs                         # SSH server configuration struct
 │   ├── user_key_signer.rs                # Handles user certificate signing requests (password auth flow)
-│   └── host_key_signer.rs                # Handles host certificate signing requests (public key auth flow)
+│   ├── host_key_signer.rs                # Handles host certificate signing requests (public key auth flow)
+│   └── signing_common.rs                 # Shared signing helpers used by both signers
 └── identiy_handlers/
     ├── mod.rs                            # UserAuthenticator trait and authenticator setup
     └── pam_auth.rs                       # PAM-based authenticator
 
 clients/                                  # Bash client scripts for certificate signing
 config/                                   # Example configuration files
+documentation/                            # Setup guides
+docker/                                   # Docker-based end-to-end test setup
+nix/                                      # Nix packages, checks, NixOS module, Debian packaging
+scripts/                                  # Helper scripts
+test_data/                                # Test keys and fixtures
 tests/                                    # Integration and end-to-end tests
-full_fuzz/                                # AFL++ fuzzing harness
+fuzz/                                     # cargo-fuzz (libFuzzer) fuzzing harness
 ```
 
 ## Client Scripts
@@ -74,6 +80,7 @@ Both scripts support `--help` for the full option list. See [User Setup](documen
 | `--certificate-authority` | `-a`  | Run as a standalone CA server                                               |
 | `--socket-path <PATH>`    | `-s`  | Unix socket path for CA communication (auto-generated if omitted)           |
 | `--disable-ca`            |       | Start the SSH server without spawning a CA child process                    |
+| `--token-file <PATH>`     |       | File holding the IPC authentication token. In SSH server mode the token is generated and written here (auto-generated path if omitted). In CA mode the token is read and the file is deleted at once. |
 
 ## How It Works
 

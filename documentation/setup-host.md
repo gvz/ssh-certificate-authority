@@ -13,6 +13,7 @@ sudo dpkg -i ssh-ca-client_<version>_all.deb
 sudo apt-get install -f
 ```
 Installs `ssh-ca-sign-host-key` to `/usr/sbin/`.
+The package built with `cargo deb` installs it to `/usr/bin/` instead.
 
 **Option B — manual:**
 ```bash

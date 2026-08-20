@@ -1,19 +1,25 @@
+# Example configuration. See documentation/setup-ca.md.
+# Relative paths are resolved against the directory of this file.
+
 [ssh]
-bind="127.0.0.1"
-port=2222
-private_key="/etc/ssh/ssh_host_ed25519_key"
-certificate="/etc/ssh/ssh_host_ed25519_key-cert.pub"
+bind = "0.0.0.0"
+port = 2222
+# Host key of the CA server itself. Not the CA signing key.
+private_key = "/etc/ssh_ca_server/ssh_ca_host_ed25519_key"
+# Host certificate of the CA server. Uncomment after signing the host key.
+#certificate = "/etc/ssh_ca_server/ssh_ca_host_ed25519_key-cert.pub"
 
 [ca]
-ca_key="../test_data/test_key"
-user_list_file="../test_data/test_key"
-default_user_template="../test_data/test_key"
-host_inventory="../config/hosts/"
-
+# Key that signs user and host certificates. Keep it private, mode 600.
+ca_key = "/etc/ssh_ca_server/ca_key"
+# Maps users to their certificate template.
+user_list_file = "/etc/ssh_ca_server/user.toml"
+# Template used for users that are not listed in user_list_file.
+default_user_template = "/etc/ssh_ca_server/user_default.toml"
+# Directory with one TOML file per enrolled host.
+host_inventory = "/etc/ssh_ca_server/hosts/"
 
 [identity_handlers]
-user_authenticators=[
+user_authenticators = [
   "pam",
 ]
-
-
