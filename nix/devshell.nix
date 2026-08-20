@@ -22,6 +22,7 @@ mkShell {
     gnumake
     grcov
     act
+    mdbook
   ];
   shellHook = ''
     export LIBCLANG_PATH="${llvmPackages.libclang.lib}/lib";

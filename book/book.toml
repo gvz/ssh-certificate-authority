@@ -1,0 +1,19 @@
+[book]
+title = "SSH Certificate Authority"
+description = "User guide for the self-hosted SSH Certificate Authority"
+authors = ["SSH CA Server Contributors"]
+language = "en"
+src = "src"
+
+[build]
+build-dir = "book"
+create-missing = false
+
+[output.html]
+default-theme = "rust"
+git-repository-url = "https://github.com/gvz/ssh-certificate-authority"
+edit-url-template = "https://github.com/gvz/ssh-certificate-authority/edit/main/book/{path}"
+
+[output.html.fold]
+enable = true
+level = 1

@@ -176,7 +176,7 @@ jobs:
           sudo dpkg -i ssh-ca-client_${VERSION}_all.deb
           \`\`\`
 
-          See the [Setup Guide](https://github.com/${{ github.repository }}/blob/$TAG/documentation/setup.md) for configuration instructions.
+          See the [User Guide](https://github.com/${{ github.repository }}/blob/$TAG/book/src/server-setup.md) for configuration instructions.
 
           ---
 

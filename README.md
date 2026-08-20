@@ -2,9 +2,18 @@
 
 This project provides a self-hosted SSH Certificate Authority (CA), similar in spirit to Let's Encrypt but for SSH certificates. Machines and users connect to this server over SSH to obtain short-lived, automatically renewable SSH certificates — replacing long-lived static keys.
 
-## Setup Guide
+## User Guide
 
-See **[Setup Guide](documentation/overview.md)** for a full walkthrough: prerequisites, building, key generation, configuration, running the server, and requesting your first certificate.
+The full guide lives in `book/`. It covers use cases, requesting user and host
+certificates, server setup, and maintenance.
+
+Read it online: <https://gvz.github.io/ssh-certificate-authority/>
+
+Build it locally:
+
+```bash
+nix develop --command mdbook serve book --open
+```
 
 ## Features
 
@@ -41,9 +50,9 @@ src/
     ├── mod.rs                            # UserAuthenticator trait and authenticator setup
     └── pam_auth.rs                       # PAM-based authenticator
 
+book/                                     # User guide (mdBook)
 clients/                                  # Bash client scripts for certificate signing
 config/                                   # Example configuration files
-documentation/                            # Setup guides
 docker/                                   # Docker-based end-to-end test setup
 nix/                                      # Nix packages, checks, NixOS module, Debian packaging
 scripts/                                  # Helper scripts
@@ -68,7 +77,7 @@ ssh-ca-sign-user-key -s ca-server.example.com
 sudo ssh-ca-sign-host-key -s ca-server.example.com --reload
 ```
 
-Both scripts support `--help` for the full option list. See [User Setup](documentation/setup-user.md) and [Host Setup](documentation/setup-host.md) for installation instructions and all options.
+Both scripts support `--help` for the full option list. See [User Certificates](book/src/user-certificates.md) and [Host Certificates](book/src/host-certificates.md) for installation instructions and all options.
 
 ---
 

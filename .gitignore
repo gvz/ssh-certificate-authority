@@ -1,6 +1,9 @@
 **/target
 **/result
 **/out
+
+# mdBook output
+/book/book/
 .gemini
 GEMINI.md
 SECURITY_ANALYSIS.md

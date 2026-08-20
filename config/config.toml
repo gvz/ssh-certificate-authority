@@ -1,4 +1,4 @@
-# Example configuration. See documentation/setup-ca.md.
+# Example configuration. See book/src/server-setup.md.
 # Relative paths are resolved against the directory of this file.
 
 [ssh]
